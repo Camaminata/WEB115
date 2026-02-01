@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FizzBuzz 0</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; }
+    header, footer { padding: 16px; background: #f4f4f4; }
+    nav ul { list-style: none; display: flex; gap: 12px; padding: 0; margin: 8px 0 0; }
+    nav a { text-decoration: none; }
+    main { padding: 16px; }
+    form { display: grid; gap: 10px; max-width: 420px; }
+    label { display: grid; gap: 6px; }
+    input { padding: 10px; }
+    button { padding: 10px; cursor: pointer; }
+    .output { margin-top: 18px; }
+    .error { color: #b00020; margin-top: 8px; }
+  </style>
+</head>
+
+<body>
+  <!-- Header / Brand -->
+  <header>
+    <h1>Camara Creative Lab</h1>
+
+    <!-- Navbar (update links to match YOUR site structure) -->
+    <nav aria-label="Main navigation">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <!-- Add your other usual links here -->
+        <li><a href="fizzbuzz0.html">FizzBuzz 0</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Page Title -->
+    <h2>FizzBuzz 0</h2>
+
+    <!-- Greeting (must have an id) -->
+    <h3 id="greeting">Welcome to Your Brand Name!</h3>
+
+    <!-- Form -->
+    <form id="name_form">
+      <label for="first_name">
+        First Name
+        <input type="text" id="first_name" placeholder="Enter your first name" />
+      </label>
+
+      <label for="middle_initial">
+        Middle Initial (optional)
+        <input type="text" id="middle_initial" placeholder="M" maxlength="1" />
+      </label>
+
+      <label for="last_name">
+        Last Name
+        <input type="text" id="last_name" placeholder="Enter your last name" />
+      </label>
+
+      <button type="submit">Submit</button>
+
+      <p id="form_error" class="error" aria-live="polite"></p>
+    </form>
+
+    <!-- Output area -->
+    <section class="output" aria-label="FizzBuzz output">
+      <div id="list_container"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; <span id="year"></span> Your Brand Name</p>
+  </footer>
+
+  <script>
+    // ====== Small footer year helper ======
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // ====== Your theme words (exactly TWO words per line) ======
+    const THEME_TWO_WORDS = "Glazed Glory"; // change to your own 2-word theme if you want
+
+    const form = document.getElementById("name_form");
+    const greetingEl = document.getElementById("greeting");
+    const errorEl = document.getElementById("form_error");
+    const listContainer = document.getElementById("list_container");
+
+    function buildName(first, middle, last) {
+      // Trim all values
+      first = first.trim();
+      middle = middle.trim();
+      last = last.trim();
+
+      // Middle initial formatting: if present, add " M."
+      // If not present, add nothing at all.
+      const middlePart = middle ? ` ${middle}.` : "";
+
+      // Build a nice display name (handles missing parts gracefully)
+      // Example: "John M. Smith", "John Smith", "John", "Smith"
+      const parts = [];
+      if (first) parts.push(first);
+      if (middle) parts.push(`${middle}.`);
+      if (last) parts.push(last);
+
+      return {
+        first,
+        fullDisplay: parts.join(" ").trim(),
+        middlePart
+      };
+    }
+
+    function askLimit(firstName) {
+      // Keep prompting until user cancels or gives a valid positive integer
+      while (true) {
+        const raw = prompt(`How high do you want to count, ${firstName || "there"}?`);
+
+        // If user cancels, stop gracefully
+        if (raw === null) return null;
+
+        const trimmed = raw.trim();
+        if (trimmed === "") {
+          alert("Please enter a number.");
+          continue;
+        }
+
+        const num = Number(trimmed);
+
+        // Must be a finite number and an integer >= 1
+        if (!Number.isFinite(num) || !Number.isInteger(num) || num < 1) {
+          alert("Please enter a whole number 1 or greater.");
+          continue;
+        }
+
+        return num;
+      }
+    }
+
+    function renderList(limit) {
+      // You can use <ul> OR <br>. This uses a <ul>.
+      const ul = document.createElement("ul");
+
+      for (let i = 1; i <= limit; i++) {
+        const li = document.createElement("li");
+        const parity = (i % 2 === 0) ? "even" : "odd";
+        li.textContent = `${i}) ${THEME_TWO_WORDS} - the number is ${parity}`;
+        ul.appendChild(li);
+      }
+
+      // Clear old output, then show new
+      listContainer.innerHTML = "";
+      listContainer.appendChild(ul);
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      errorEl.textContent = "";
+      listContainer.innerHTML = "";
+
+      const first = document.getElementById("first_name").value;
+      const middle = document.getElementById("middle_initial").value;
+      const last = document.getElementById("last_name").value;
+
+      const nameInfo = buildName(first, middle, last);
+
+      // Graceful validation:
+      // You can decide what’s required. Here: first name is required for prompt personalization.
+      if (!nameInfo.first) {
+        errorEl.textContent = "Please enter at least your first name.";
+        return;
+      }
+
+      // Update greeting (brand + user name)
+      // If middle initial is empty, it omits it completely (no stray period).
+      // If last name is empty, it still works.
+      const brand = "Camara Creative Lab"; // change this to your brand
+      const displayName = nameInfo.fullDisplay || nameInfo.first;
+
+      greetingEl.textContent = `Welcome to ${brand} ${displayName}!`;
+
+      // Prompt for limit, using FIRST NAME dynamically in the message
+      const limit = askLimit(nameInfo.first);
+      if (limit === null) {
+        // user canceled prompt; do nothing else
+        return;
+      }
+
+      // Render loop output up to user's limit
+      renderList(limit);
+    });
+  </script>
+
+  <!-- REQUIRED dynamic validation script (put in ALL html files) -->
+  <script src="https://lint.page/kit/880bd5.js" crossorigin="anonymous"></script>
+</body>
+</html>
